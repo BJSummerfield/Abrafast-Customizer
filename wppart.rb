@@ -4,28 +4,49 @@ require 'csv'
 lengths = []
 
 # in inches - 6" * 4
-min_length = 48
+min_length = 24
 
 # in inches - 12'
-max_length = 288
+max_length = 576
 
 # 1/4"
-increments = 48
+increments = 1
 skus = []
 
 def runner(types, grades, finishes, diameters, lengths, min_length, max_length, increments, skus)
   populate_lengths(lengths, min_length,max_length,increments)
   variations(types, grades, finishes, diameters, lengths, skus)
-  create_csv(skus)
+  # create_csv(skus)
+  p skus.length
 end
 
 def item_create(type,grade,finish,diameter,length,skus)
   a = {'type' => type ,"grade" => grade, 'finish' => finish,'diameter' => diameter, 'length' => length}
-  item = {'Part Number' => "", 'Description' => "", "Cost" => ""}
-  item['Part Number'] = create_part_number(a)
+  item = create_key
+  item['Name'] = create_part_number(a)
+  item['SKU'] = create_part_number(a)
   item['Description'] = create_description(a)
-  item['Cost'] = create_cost(a)
+  item['Regular price'] = create_cost(a)
+  item['Weight (lbs)'] = create_weight(a)
   return item
+end
+
+def create_key
+  key = {
+    "Type" => 'simple',
+    "SKU" => "",
+    "Name" => "",
+    "Short description" => "Manufacturer: Abrafast",
+    "Description" => "",
+    "Weight (lbs)" => "",
+    "Regular price" => ""
+  }
+  return key
+end
+
+def create_weight(a)
+  weight = ((a['length']/4)*a['diameter']['weight'])/10000.00
+  return weight
 end
 
 def create_cost(a)
@@ -37,7 +58,7 @@ def create_cost(a)
   c += a['diameter']['cost']
   c = c * mult
   c = (c * (a['length']/4)) / 100000.00
-  p "sell price = #{c}"
+  # p "sell price = #{c}"
   return c
 end
 
@@ -131,7 +152,7 @@ def populate_lengths(lengths, min_length, max_length, increments)
 end
 
 def create_csv(skus)
-  CSV.open("./ab2.CSV", "wb") do |csv|
+  CSV.open("./anchor_bolts.CSV", "wb") do |csv|
     input = []
     skus[0].each do |k,v|
       input << k
